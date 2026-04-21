@@ -1,0 +1,67 @@
+# ---------------------------------------------------------------------------
+# Hyperbolic-JEPA — FULLY HYPERBOLIC variant.
+#
+# Encoder + predictor block stacks both operate on the Poincaré ball:
+#   * Möbius matmul for MLP linears and biases (Ganea et al. 2018)
+#   * Möbius addition for residual connections
+#   * Tangent-space multi-head attention (log → MHA → exp)
+#   * Tangent LayerNorm + GELU
+#   * Parameters stay Euclidean → standard AdamW (no Riemannian optimizer)
+#
+# Compare against:
+#   configs/hyperbolic_ijepa_mps.yaml   (loss-only hyperbolic)
+#   configs/euclidean_ijepa_mps.yaml    (faithful Euclidean I-JEPA baseline)
+#
+# Expected wall-clock on an M3 Max: roughly 2-3x slower than Euclidean/loss-
+# only-hyperbolic because each block does 5-6 extra exp/log/atanh calls.
+# Plan on ~6-10h for 50 epochs; start with the smoke config first.
+# ---------------------------------------------------------------------------
+
+# --- data ---
+dataset: cifar10
+data_root: ~/data
+img_size: 32
+patch_size: 4
+num_workers: 2
+
+# --- model ---
+encoder: hyp_vit_tiny           # the 'hyp_' prefix routes to HyperbolicVisionTransformer
+predictor_embed_dim: 96
+predictor_depth: 4
+predictor_num_heads: 4
+
+# --- masking ---
+enc_mask_scale: [0.85, 1.0]
+pred_mask_scale: [0.15, 0.20]
+aspect_ratio: [0.75, 1.5]
+num_enc_masks: 1
+num_pred_masks: 4
+min_keep: 4
+allow_overlap: false
+
+# --- optimization ---
+batch_size: 128
+epochs: 50
+warmup_epochs: 3
+start_lr: 0.0002
+lr: 0.0008
+final_lr: 1.0e-6
+weight_decay: 0.04
+final_weight_decay: 0.2
+ema_start: 0.996
+ema_end: 1.0
+grad_clip: 3.0
+amp: false
+log_every: 50
+save_every: 5
+
+# --- loss ---
+loss_type: poincare             # keep the Poincaré regression loss to match
+                                # the loss-only-hyperbolic baseline; the delta
+                                # between those two runs isolates the effect
+                                # of the hyperbolic *backbone*, not the loss.
+curvature: 1.0                  # same c used by both the backbone and the loss
+clip_radius: 1.0
+loss_power: 2.0
+
+output_dir: ./runs/fullhyp_mps_cifar10

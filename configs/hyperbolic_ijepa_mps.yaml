@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Hyperbolic-JEPA  —  REAL small-scale training on Apple Silicon (MPS)
+# Target: CIFAR-10 pretraining on a single Apple M3 Max laptop.
+# Expected wall-clock: ~2-4 hours  (finishes overnight, easy).
+#
+# Tune knobs you are most likely to want to change:
+#   - `epochs`        : increase to 100-150 for a stronger probe
+#   - `encoder`       : vit_tiny (default) < vit_small (if you have patience)
+#   - `curvature`     : 1.0 = Poincaré, 1e-6 = ~Euclidean baseline
+# ---------------------------------------------------------------------------
+
+# --- data ---
+dataset: cifar10                # CIFAR-10 first; swap to cifar100 later
+data_root: ~/data
+img_size: 32
+patch_size: 4                   # 8x8 = 64 patches
+num_workers: 2                  # fork-safe on macOS
+
+# --- model ---
+encoder: vit_tiny               # ~5.5M params — M3 Max handles this comfortably
+predictor_embed_dim: 96
+predictor_depth: 4
+predictor_num_heads: 4
+
+# --- masking ---
+enc_mask_scale: [0.85, 1.0]
+pred_mask_scale: [0.15, 0.20]
+aspect_ratio: [0.75, 1.5]
+num_enc_masks: 1
+num_pred_masks: 4
+min_keep: 4
+allow_overlap: false
+
+# --- optimization ---
+batch_size: 128                 # ~390 iters/epoch on CIFAR-10
+epochs: 50
+warmup_epochs: 3
+start_lr: 0.0002
+lr: 0.0008                      # scaled down from 1e-3 for the smaller batch
+final_lr: 1.0e-6
+weight_decay: 0.04
+final_weight_decay: 0.2
+ema_start: 0.996
+ema_end: 1.0
+grad_clip: 3.0
+amp: false                      # no-op on MPS / CPU
+log_every: 50
+save_every: 5
+
+# --- loss ---
+loss_type: poincare             # 'poincare' (hyperbolic) | 'euclidean' (baseline)
+curvature: 1.0                  # Poincaré curvature (c > 0); used iff loss_type=poincare
+clip_radius: 1.0                # Guo et al. 2022 feature clipping; ditto
+loss_power: 2.0                 # squared distance (match across A/B for fairness)
+
+output_dir: ./runs/hjepa_mps_cifar10

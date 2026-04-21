@@ -1,0 +1,7 @@
+torch>=2.1
+torchvision>=0.16
+pyyaml>=6.0
+numpy>=1.24
+# optional but recommended — Riemannian ops / optimizer if you want to
+# experiment with hyperbolic *parameters* (not used by default).
+# geoopt>=0.5
