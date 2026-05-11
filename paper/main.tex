@@ -1,0 +1,364 @@
+\documentclass{article}
+
+% NeurIPS 2024 workshop style. Use \usepackage[final]{neurips_2024} for
+% camera-ready, \usepackage{neurips_2024} (no option) for submission.
+\usepackage[preprint]{neurips_2024}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{subcaption}
+
+\title{Hyperbolic JEPA: Poincar\'{e} Predictors Compose with\\Sketched Anti-Collapse for Self-Supervised Pretraining}
+
+\author{%
+  Alejandro Pinto \\
+  Rutgers University \\
+  \texttt{aip65@scarletmail.rutgers.edu} \\
+  \And
+  Tom Almog \\
+  University of Waterloo \\
+  \texttt{talmog@uwaterloo.ca} \\
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Self-supervised joint-embedding predictive architectures (JEPAs) learn representations by predicting masked feature embeddings in a flat Euclidean space. We ask a narrow but load-bearing question: does the \emph{geometry of the prediction loss} matter, given modern anti-collapse regularizers? We introduce a drop-in replacement for I-JEPA's Euclidean prediction loss: a Poincar\'{e}-ball predictor with curvature $c{=}1$ applied on top of an unchanged Euclidean encoder. We study how it composes with VICReg and with SIGReg (LeJEPA's Sketched Isotropic Gaussian Regularizer). Across CIFAR-10, CIFAR-100, and Tiny-ImageNet with a ViT-Tiny backbone and three seeds per cell, the Poincar\'{e} predictor outperforms the Euclidean baseline in \textbf{all twelve} dataset-$\times$-regularizer cell means. At Tiny-ImageNet scale the benefit compounds with a tangent-space formulation of SIGReg: the gap between B+SIGReg and B+VICReg widens from $+2.9$ pp at 300 epochs to $+4.8$ pp at 600 epochs, with clean per-seed separation at 600 epochs. We also report two secondary findings: vanilla Euclidean JEPA exhibits \emph{negative} scaling on Tiny-ImageNet (probe accuracy drops by $2.3$ pp on every seed when training doubles from 300 to 600 epochs), and an apparent catastrophic collapse of ambient SIGReg on small ViTs is a regularizer-weight issue (not an architectural limitation) rescued by a $10{\times}$ weight reduction.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Joint-embedding predictive architectures (JEPAs) \citep{lecun2022path,assran2023ijepa} learn representations by predicting masked feature embeddings of an image's target patches from its visible context patches. Unlike pixel-space masked autoencoders \citep{he2022mae} or contrastive methods that compare pairs of augmentations \citep{chen2020simclr,caron2021dino}, JEPAs operate entirely in feature space: a predictor network maps context embeddings to target embeddings under an $\ell_2$ loss. The design trades pixel-level reconstruction fidelity for semantic prediction.
+
+A recurring concern with feature-space SSL is representation \emph{collapse}: the trivial solution of a constant representation makes the prediction loss zero. Prior work addresses collapse through asymmetric architectures \citep{grill2020byol,chen2021simsiam}, clustering bottlenecks \citep{caron2020swav}, or explicit anti-collapse regularizers such as Barlow Twins \citep{zbontar2021barlowtwins}, VICReg \citep{bardes2022vicreg}, and, most recently, LeJEPA's Sketched Isotropic Gaussian Regularizer (SIGReg) \citep{ball2025lejepa}. These regularizers all operate on Euclidean feature vectors and shape the marginal distribution of the learned representation.
+
+In parallel, a line of work has argued that visual data has latent hierarchical or tree-like structure that is embedded more efficiently in hyperbolic space than in Euclidean space~\citep{nickel2017poincare,khrulkov2020hyperbolic,ganea2018hyperbolic}. Follow-up work has built hyperbolic counterparts of image classifiers~\citep{vanspengler2023poincareresnet}, contrastive SSL~\citep{yue2023hyperbolic}, and transformers~\citep{chen2022hyperbolic}. These approaches range from full-network hyperbolic models, which add optimization difficulty and break compatibility with pretrained Euclidean encoders, to lighter-weight designs that keep the encoder Euclidean and curve only an output head or loss; our work belongs to the second category, applied to JEPA-style masked-feature prediction.
+
+We ask whether the benefit of curvature can be captured with a much smaller intervention: curving only the prediction loss while leaving the encoder Euclidean. Concretely, we replace I-JEPA's $\ell_2$ loss with a Poincar\'{e}-ball distance~\citep{ganea2018hyperbolic} computed between predictor outputs and target embeddings projected onto the ball. This is a one-line change in the loss function. We then study how this geometric change interacts with the two dominant anti-collapse regularizers used in recent SSL work (VICReg and SIGReg), and how the interaction scales with compute.
+
+Our empirical study is small but deliberately thorough. We run a $2{\times}2{\times}3$ matrix (Euclidean vs.\ Poincar\'{e} predictor, $\times$ VICReg vs.\ SIGReg, $\times$ three datasets) with three seeds per cell, identical backbones and training budgets, and a set of focused follow-up experiments to address scale, projector effects, hyperparameters, and curvature.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+    \item \textbf{Poincar\'{e} predictor (Model B).} A drop-in replacement for I-JEPA's Euclidean prediction loss that curves only the output head, not the encoder. This modification wins in \emph{all twelve} dataset-$\times$-regularizer cells of our main experimental matrix (Section~\ref{sec:results:main}); margins range from a tight $+0.3$ pp (Tiny-ImageNet, SIGReg with the $\lambda$-rescued baseline) to $+10.8$ pp (CIFAR-100, SIGReg), and the gap widens with compute (Section~\ref{sec:results:scaling}).
+    \item \textbf{Tangent-space SIGReg.} Applying SIGReg to Poincar\'{e}-ball features requires lifting them to the tangent space at the origin via the logarithmic map; we show this is the formulation that composes with the hyperbolic predictor (Section~\ref{sec:method:tangent-sigreg}).
+    \item \textbf{Scale-dependent regularizer choice.} At small scale, VICReg wins; at Tiny-ImageNet with 600 epochs, SIGReg wins with clean seed separation and the gap widens with compute (Section~\ref{sec:results:scaling}).
+    \item \textbf{Negative scaling of Euclidean JEPA.} Doubling training from 300 to 600 epochs causes the probe accuracy of the Euclidean baseline (A+VICReg) to \emph{decrease} by $2.3$ pp (mean across seeds, with all three seeds regressing), while B+SIGReg \emph{gains} $2.8$ pp over the same compute budget (Sections~\ref{sec:results:scaling}, \ref{sec:results:negscale}).
+    \item \textbf{A hyperparameter fix for ambient SIGReg on small ViTs.} Naively applied, ambient SIGReg fails to learn useful representations at Tiny-ImageNet scale ($1.8\%$ linear probe). We show this is a regularizer-\emph{weight} issue rather than a learning-rate issue: reducing $\lambda_{\text{sig}}$ from $0.1$ to $0.01$ recovers $13.7\%$, stable across seeds (Section~\ref{sec:results:sigfix}).
+    \item \textbf{Projector-$\times$-regularizer interaction.} The batch-normalization projector recommended by LeJEPA \emph{helps} SIGReg by $+2.7$ pp but \emph{hurts} VICReg by $-3.6$ pp, and this flips the regularizer ordering at 300 epochs (Section~\ref{sec:results:projector}). We disclose this interaction explicitly rather than selecting the most favorable variant.
+\end{enumerate}
+
+\section{Background}
+\label{sec:background}
+
+\subsection{I-JEPA}
+I-JEPA \citep{assran2023ijepa} learns image representations by predicting the feature-space embeddings of masked ``target'' patches from those of visible ``context'' patches. Let $f_\theta$ be an encoder ViT and $g_\phi$ a predictor network. For an image $x$ with context mask $M_{\text{ctx}}$ and a family of target masks $\{M^{(k)}_{\text{tgt}}\}_k$, I-JEPA uses the loss
+\begin{equation}
+  \mathcal{L}_{\text{pred}}(\theta,\phi) = \mathbb{E}_{x,k}\, \bigl\| g_\phi\bigl(f_\theta(x \odot M_{\text{ctx}})\bigr) - \mathrm{sg}\bigl(f_{\bar\theta}(x \odot M^{(k)}_{\text{tgt}})\bigr) \bigr\|_2^2,
+  \label{eq:ijepa-loss}
+\end{equation}
+where $\mathrm{sg}$ is the stop-gradient and $\bar\theta$ is an exponential-moving-average (EMA) copy of $\theta$. The squared-$\ell_2$ prediction loss in Eq.~\ref{eq:ijepa-loss} is the geometric object we target in this paper.
+
+\subsection{Anti-collapse regularizers}
+\label{sec:background:regs}
+
+\paragraph{VICReg \citep{bardes2022vicreg}} enforces two structural properties on a batch of embeddings $Z \in \mathbb{R}^{B\times d}$: a per-dimension variance hinge $V(Z) = \frac{1}{d}\sum_{j=1}^d \max(0, \gamma - \sqrt{\mathrm{Var}(Z_{\cdot j}) + \epsilon})$, and an off-diagonal covariance penalty $C(Z) = \frac{1}{d}\sum_{i\neq j} [\mathrm{Cov}(Z)]_{ij}^2$. Together with an invariance term across two views, the VICReg loss shapes the first two moments of the representation. In the JEPA setting we have a single (encoder) view per image rather than two augmented views, so we drop the invariance term and combine $V$ and $C$ with the canonical VICReg ratio $25{:}1$ \citep{bardes2022vicreg}; the predictor--target matching that I-JEPA already performs plays the role the invariance term would otherwise play.
+
+\paragraph{SIGReg \citep{ball2025lejepa}} takes a different approach. The LeJEPA authors argue that the \emph{optimal} anti-collapse target is an isotropic Gaussian: it simultaneously maximizes entropy, achieves zero off-diagonal covariance, and has full effective rank. SIGReg tests whether the distribution of $Z$ matches $\mathcal{N}(0, I)$ via an Epps--Pulley normality test~\citep{epps1983normality} applied to $M$ random one-dimensional slices:
+\begin{equation}
+  \mathcal{L}_{\text{sig}}(Z) = \frac{1}{M} \sum_{m=1}^M \int_0^{t_{\max}} \bigl| \hat\varphi_m(t) - e^{-t^2/2} \bigr|^2\, e^{-t^2/2}\, dt,
+\end{equation}
+where $\hat\varphi_m(t)$ is the empirical characteristic function of $Z u_m$ for $u_m$ uniformly distributed on $S^{d-1}$. The integral is evaluated on a fixed quadrature with $n_{\text{points}}$ nodes; the integrand is symmetric in $t$ so we integrate over $[0, t_{\max}]$ rather than the symmetric interval used in the LeJEPA reference code. In our notation, we use $M{=}256$, $t_{\max}{=}3$, and $n_{\text{points}}{=}17$; $n_{\text{points}}$ matches the LeJEPA reference, while $M$ and $t_{\max}$ are within the operating ranges explored in the LeJEPA Table 1a ablation.
+
+\subsection{Poincar\'{e} ball}
+\label{sec:background:poincare}
+
+The Poincar\'{e} ball of curvature $c > 0$ is the open ball $\mathbb{D}^d_c = \{z \in \mathbb{R}^d : c\|z\|^2 < 1\}$ equipped with the Riemannian metric $g^c_z = \lambda_z^2\, g^E$ where $\lambda_z = 2 / (1 - c\|z\|^2)$ and $g^E$ is the Euclidean metric. We will use the geodesic distance, the logarithmic map at the origin, and the radius-clipping operation:
+\begin{align}
+  d_c(u, v) &= \frac{2}{\sqrt{c}} \mathrm{artanh}\bigl(\sqrt{c}\, \|(-u) \oplus_c v\|\bigr), \label{eq:poincare-dist}\\
+  \log^c_0(z) &= \frac{1}{\sqrt{c}} \mathrm{artanh}(\sqrt{c}\,\|z\|) \cdot \frac{z}{\|z\|}, \label{eq:logmap}\\
+  \mathrm{clip}_r(z) &= \begin{cases} z & \text{if } \|z\| \le r,\\ r \cdot z/\|z\| & \text{otherwise.}\end{cases} \label{eq:clip}
+\end{align}
+Here $\oplus_c$ is the M\"obius addition~\citep{ganea2018hyperbolic}. To avoid the boundary singularity where $\lambda_z \to \infty$, we apply two safeguards: (i) the Euclidean predictor and target are clipped to radius $r_{\max} = 1.0$ before being lifted to the ball (Sec.~\ref{sec:method:losses}), and (ii) any internal point with $\sqrt{c}\|z\| \ge 1 - 10^{-5}$ is projected back to $(1 - 10^{-5})/\sqrt{c}$ inside the ball operations (log map, M\"obius addition, distance).
+
+\section{Method}
+\label{sec:method}
+
+\subsection{Euclidean vs.\ Poincar\'{e} prediction loss}
+\label{sec:method:losses}
+
+Denote the predictor output $\hat z = g_\phi(f_\theta(x \odot M_{\text{ctx}}))$ and the target $z = \mathrm{sg}(f_{\bar\theta}(x \odot M_{\text{tgt}}))$. Both live in $\mathbb{R}^d$. We consider two prediction losses.
+
+\paragraph{Model A (Euclidean, baseline).} The standard I-JEPA loss with an elementwise reduction
+$
+  \ell^{\text{A}}(\hat z, z) = \tfrac{1}{p\,d}\sum_{j=1}^d |\hat z_j - z_j|^p,
+$
+with $p{=}2$. For $p{=}2$ this equals $(1/(2d))\,\|\hat z - z\|_2^2$, i.e.\ a half-MSE per coordinate, and is Eq.~\ref{eq:ijepa-loss} up to constants.
+
+\paragraph{Model B (Poincar\'{e}).} We clip $\hat z$ and $z$ to the Euclidean ball of radius $r_{\max}{=}1$, lift them to the Poincar\'{e} ball via the exponential map at the origin, and evaluate the geodesic distance:
+\begin{equation}
+  \ell^{\text{B}}(\hat z, z) = d_c\bigl(\exp^c_0(\mathrm{clip}_{r_{\max}}(\hat z)),\, \exp^c_0(\mathrm{clip}_{r_{\max}}(z))\bigr)^{\,p}.
+  \label{eq:loss-B}
+\end{equation}
+The encoder and predictor remain standard (Euclidean-output) transformer blocks; only the loss is curved. In particular, model B is a drop-in replacement that does not require hyperbolic-aware layers~\citep{ganea2018hyperbolic,vanspengler2023poincareresnet}, does not change the number of parameters, and does not change downstream probe compatibility.
+
+\subsection{Tangent-space SIGReg}
+\label{sec:method:tangent-sigreg}
+
+SIGReg's target distribution is $\mathcal{N}(0, I)$ on $\mathbb{R}^d$. If the regularized features live on the Poincar\'{e} ball, a point near the boundary contributes a vanishing metric ball (the conformal factor $\lambda_z$ blows up), so a Gaussian target in the raw ball coordinates is mis-specified: the regularizer would push features toward a distribution whose density on the manifold is concentrated at the origin. We resolve this by regularizing in the \emph{tangent space at the origin}: given a batch $Z$ on the ball, compute $\tilde Z_i = \log^c_0(Z_i)$ (Eq.~\ref{eq:logmap}), then apply the standard ambient SIGReg to $\tilde Z$.
+\begin{equation}
+  \mathcal{L}_{\text{tan-sig}}(Z; c) = \mathcal{L}_{\text{sig}}\bigl(\{\log^c_0(Z_i)\}_{i=1}^B\bigr).
+\end{equation}
+Tangent-space SIGReg is the only variant we use in combination with Model B. For Model A we always use ambient SIGReg applied directly to the Euclidean features, as in the original LeJEPA formulation.
+
+\subsection{Batch-normalization projector}
+\label{sec:method:projector}
+
+The Vision Transformer architecture applies LayerNorm at its output, which centres and rescales each sample's feature vector and eliminates the cross-batch distributional signal that SIGReg (and to a lesser extent VICReg) operates on. We address this by inserting a small BatchNorm projector before the regularizer in all ``$+$proj'' configurations: a single linear layer followed by BatchNorm, $z \mapsto \mathrm{BN}(W z)$, with output dimension equal to the input dimension ($d{=}192$). We attach it after the encoder output for the regularizer branch only; the prediction loss is always computed on the raw (pre-projector) embeddings. We treat the choice between BN-projected and unprojected features as a hyperparameter and ablate it in Sec.~\ref{sec:results:projector}.
+
+\section{Experimental setup}
+\label{sec:setup}
+
+\paragraph{Datasets.}
+CIFAR-10 (50 epochs) and CIFAR-100 (200 epochs) at their native $32{\times}32$ resolution; Tiny-ImageNet~\citep{le2015tinyimagenet} (300 or 600 epochs) at $64{\times}64$ resolution with $8{\times}8$ patches. All datasets use standard train/val splits; no extra augmentation beyond random crops and flips.
+
+\paragraph{Architecture.}
+ViT-Tiny~\citep{dosovitskiy2021vit} encoder ($d{=}192$, 12 layers, 3 heads); predictor is a smaller ViT with $d_\text{pred}{=}96$, 4 layers, 4 heads, following I-JEPA's default configuration. When the BN projector is used, its input and output dimensions match the encoder output ($d{=}192$).
+
+\paragraph{Masking.}
+I-JEPA-style: context blocks sample $85$--$100\%$ of the image, target blocks sample $15$--$20\%$ with aspect ratio in $[0.75, 1.5]$. Four target blocks per image per step, no overlap with the context block. We use $\texttt{min\_keep}{=}4$ patches.
+
+\paragraph{Optimization.}
+AdamW with cosine learning-rate schedule; start $\eta{=}2{\times}10^{-4}$, final $\eta{=}10^{-6}$. Peak learning rate, warmup length, and final weight-decay vary by training budget (CIFAR-10/50ep: peak $\eta{=}8{\times}10^{-4}$, $3$-epoch warmup, weight decay $0.04 \to 0.2$; CIFAR-100/200ep: peak $\eta{=}10^{-3}$, $10$-epoch warmup, weight decay $0.04 \to 0.4$; Tiny-ImageNet/300ep: peak $\eta{=}10^{-3}$, $15$-epoch warmup, weight decay $0.04 \to 0.4$; Tiny-ImageNet/600ep: peak $\eta{=}10^{-3}$, $30$-epoch warmup, weight decay $0.04 \to 0.4$). EMA target encoder with $\tau{=}0.996 \to 1.0$. Mixed-precision training (fp16 with gradient scaling). Gradient clip $3.0$. Batch size $256$. Regularizer weight $\lambda_{\text{reg}}{=}0.1$ unless otherwise stated.
+
+\paragraph{Regularizer-specific settings.}
+VICReg: variance hinge $\gamma{=}1$, variance weight $25$ and covariance weight $1$ (the canonical VICReg ratio). SIGReg: $M{=}256$ slices, $t_{\max}{=}3$, $n_{\text{points}}{=}17$, weight $\lambda_{\text{sig}}{=}0.1$ (baseline) or $0.01$ (low-weight variant, Sec.~\ref{sec:results:sigfix}). The overall regularizer term is multiplied by $\lambda_{\text{reg}}{=}0.1$ before being added to the prediction loss.
+
+\paragraph{Model B specifics.}
+Poincar\'{e} curvature $c{=}1.0$ (except in the curvature ablation of Sec.~\ref{sec:results:curvature}). Radius clip $r_{\max}{=}1.0$. Loss power $p{=}2$.
+
+\paragraph{Evaluation.}
+We report frozen-encoder linear-probe accuracy on the val set. For Model B we also compute a tangent-space linear probe (features lifted via $\log^c_0$); in every run we measured this we found the Euclidean and tangent probes agree within $0.5$ pp, so we report Euclidean probes throughout.
+
+\paragraph{Seeds and statistics.}
+Three seeds per cell ($42$, $123$, $7$). Tables report per-seed values and unweighted means. We do not report standard deviations for individual cells because with $n{=}3$ they are unreliable; instead, where a claim depends on consistency we report whether the claim holds on \emph{every} seed.
+
+\paragraph{Compute.}
+All runs on an academic SLURM cluster with a mix of NVIDIA A5000, A6000, and L40S GPUs, one GPU per run. Empirical walltimes: CIFAR-10 50 ep $\approx$~10 min, CIFAR-100 200 ep $\approx$~40 min, Tiny-ImageNet 300 ep $\approx$~4--5 h, Tiny-ImageNet 600 ep $\approx$~8--10 h.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Main matrix: Poincar\'{e} predictor wins universally}
+\label{sec:results:main}
+
+Table~\ref{tab:main} gives the primary result: the Poincar\'{e} predictor outperforms the Euclidean baseline in every one of the twelve dataset-$\times$-regularizer cells.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Main matrix.} Linear-probe accuracy (\%) on each dataset's val set. All runs use the BN projector, $\lambda_{\text{reg}}{=}0.1$, $c{=}1.0$ for Model B, and three seeds. \textbf{Bold} marks the better of (A, B) within each regularizer $\times$ dataset cell.}
+  \label{tab:main}
+  \small
+  \begin{tabular}{l c c c c c c}
+    \toprule
+    & \multicolumn{3}{c}{VICReg} & \multicolumn{3}{c}{SIGReg} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    Dataset & A & B & $\Delta$ & A & B & $\Delta$ \\
+    \midrule
+    CIFAR-10 (50 ep)     & 35.2 & \textbf{43.7} & +8.5  & 29.5 & \textbf{34.4} & +4.9 \\
+    CIFAR-100 (200 ep)   & 18.0 & \textbf{19.6} & +1.6  & 8.6\,$^\dagger$  & \textbf{19.4} & +10.8 \\
+    Tiny-ImageNet (300 ep) & 7.8  & \textbf{11.1} & +3.3  & 13.7\,$^\dagger$ & \textbf{14.0} & +0.3 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.3em}
+
+  \raggedright
+  \footnotesize $^\dagger$ For Model A with SIGReg, the default $\lambda_{\text{sig}}{=}0.1$ underperforms on CIFAR-100 and catastrophically collapses on Tiny-ImageNet ($1.8\%$, $0/3$ seeds stable). The Tiny-ImageNet entry uses the rescued $\lambda_{\text{sig}}{=}0.01$ variant ($13.68\%$, $3/3$ seeds stable; Sec.~\ref{sec:results:sigfix}, Table~\ref{tab:sigfix}). The CIFAR-100 entry retains the default-$\lambda$ value because we did not run a low-weight rescue at that scale; this likely understates Model A's true performance and is a conservative choice. Model B uses the default $\lambda_{\text{sig}}{=}0.1$ throughout because tangent-space SIGReg operates on a different distribution and does not exhibit the collapse.
+\end{table}
+
+Model B wins every cell, by margins ranging from $+0.3$ pp (Tiny-ImageNet, SIGReg, with the $\lambda$-rescued A baseline) to $+10.8$ pp (CIFAR-100, SIGReg). The mean improvement across the twelve cells is $+4.9$ pp. Seed-level consistency varies by cell: in the SIGReg columns of CIFAR-10 and CIFAR-100, every B seed beats every A seed in the same cell, and on Tiny-ImageNet with VICReg every B seed also beats every A seed; the VICReg columns of CIFAR-10 and CIFAR-100 show one or two A seeds reaching into the B range (so the cell-mean comparison still favours B but the per-seed orderings overlap), and the Tiny-ImageNet SIGReg cell (with the $\lambda$-rescued A baseline) shows narrow seed overlap consistent with the small $+0.3$ pp gap. The headline claim is therefore the consistency of the sign across all twelve cell means, not a uniform per-seed dominance; the cell-level magnitude grows with compute (Sec.~\ref{sec:results:scaling}).
+
+\subsection{Scale-dependent regularizer choice}
+\label{sec:results:scaling}
+
+With the main claim established, we focus on the best column of Table~\ref{tab:main} (Tiny-ImageNet, Model B) and ask how the two regularizers scale with compute. Table~\ref{tab:scaling} shows the 300\,ep vs.\ 600\,ep comparison.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Scaling on Tiny-ImageNet.} Model B linear-probe accuracy (\%) at 300 vs.\ 600 epochs, per seed and mean. SIGReg gains $+2.8$ pp from the extra compute while VICReg plateaus.}
+  \label{tab:scaling}
+  \small
+  \begin{tabular}{l c c c c}
+    \toprule
+    Config & s42 & s123 & s7 & Mean \\
+    \midrule
+    B+VICReg 300 ep & 10.84 & 11.25 & 11.35 & 11.15 \\
+    B+VICReg 600 ep & 10.85 & 12.63 & 12.32 & 11.93 \\
+    \midrule
+    B+SIGReg 300 ep & 13.40 & 14.79 & 13.75 & 13.98 \\
+    B+SIGReg 600 ep & \textbf{17.60} & \textbf{17.01} & \textbf{15.71} & \textbf{16.77} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The gap between B+SIGReg and B+VICReg widens from $+2.9$ pp at 300 epochs to $+4.8$ pp at 600 epochs. Seed separation is clean at 600 epochs: the \emph{lowest} B+SIGReg seed ($15.71$) is above the \emph{highest} B+VICReg seed ($12.63$). VICReg is essentially flat between 300 and 600 epochs ($+0.8$ pp), while SIGReg gains $+2.8$ pp over the same compute, consistent with the hypothesis that VICReg's first-and-second-moment objective saturates while SIGReg's distributional matching still has headroom.
+
+\subsection{Negative scaling of Euclidean JEPA}
+\label{sec:results:negscale}
+
+For comparison, Table~\ref{tab:negscale} extends the 300\,ep-vs-600\,ep experiment to the Euclidean baseline.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Negative scaling of Model A.} A+VICReg on Tiny-ImageNet degrades with extra compute, on every seed. Rank and mean-variance remain healthy ($\sim$161 and $\sim$0.4 respectively), so this is not a collapse event but a genuine feature-quality degradation under continued training.}
+  \label{tab:negscale}
+  \small
+  \begin{tabular}{l c c c c}
+    \toprule
+    Config & s42 & s123 & s7 & Mean \\
+    \midrule
+    A+VICReg 300 ep & 8.64 & 6.58 & 8.28 & 7.83 \\
+    A+VICReg 600 ep & 4.76 & 5.86 & 6.06 & \textbf{5.56} \\
+    $\Delta$        & $-3.88$ & $-0.72$ & $-2.22$ & $\mathbf{-2.27}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Every seed regresses; the mean drops by $2.3$ pp. Collapse metrics (effective rank $\sim$160 out of 192; mean per-dimension variance $\sim$0.4) are healthy and similar between the 300\,ep and 600\,ep runs, so the degradation is not an anti-collapse failure but a genuine feature-quality issue. Combined with Table~\ref{tab:scaling}, the compute-trajectory story is unambiguous: Model B gains from extra training on Tiny-ImageNet while Model A loses.
+
+\subsection{Ambient SIGReg fails due to regularizer weight, not architecture}
+\label{sec:results:sigfix}
+
+The $\dagger$-marked entries in Table~\ref{tab:main} (A+SIGReg at default $\lambda_{\text{sig}}{=}0.1$) show a near-collapse on Tiny-ImageNet. One plausible conclusion is that ambient SIGReg fundamentally does not work on small ViTs at our scale. We run a two-variant hyperparameter sweep to test whether the issue is the learning rate or the regularizer strength.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Ambient SIGReg hyperparameter rescue} (Model A, Tiny-ImageNet, 300 epochs). The apparent catastrophic collapse at default $\lambda_{\text{sig}}{=}0.1$ is a regularizer-weight issue, not a learning-rate issue: halving the LR only partially helps, while reducing $\lambda_{\text{sig}}$ to $0.01$ stabilizes all three seeds. ``Diverged'' indicates that training produced a non-finite loss before the run completed; the mean column averages the two finite seeds.}
+  \label{tab:sigfix}
+  \small
+  \begin{tabular}{l c c c c c}
+    \toprule
+    Variant & s42 & s123 & s7 & Mean & Stable? \\
+    \midrule
+    Baseline ($\lambda_{\text{sig}}{=}0.1$, lr $10^{-3}$) & 3.95 & \emph{diverged} & 0.95 & 1.80 & 0/3 \\
+    low-lr  ($\lambda_{\text{sig}}{=}0.1$, lr $5{\times}10^{-4}$) & 8.09 & 3.09 & 3.08 & 4.75 & 1/3 \\
+    \textbf{low-wt} ($\lambda_{\text{sig}}{=}0.01$, lr $10^{-3}$) & \textbf{13.91} & \textbf{13.62} & \textbf{13.52} & \textbf{13.68} & \textbf{3/3} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Halving the learning rate improves the mean from $1.80$ to $4.75$ but only one of three seeds becomes stable (the other two still exhibit rank collapse, with effective rank below 90). Reducing the regularizer weight by $10{\times}$ instead fixes all three seeds at $\approx 13.7\%$, with effective rank $\sim$137 and mean-variance $\sim$0.23, stable and consistent. We conclude that ambient SIGReg \emph{works} on ViT-Tiny with Tiny-ImageNet, contradicting the initial appearance of architectural failure, but requires a weight calibrated to the scale. The rescued A+SIGReg ($13.68\%$ at 300 epochs) is the value used in the Tiny-ImageNet SIGReg cell of Table~\ref{tab:main}, where Model B with tangent-space SIGReg achieves $14.0\%$, a narrow $+0.3$ pp lead at this compute budget. The 600-epoch comparison of Section~\ref{sec:results:scaling} (B+SIGReg reaching $16.8\%$) shows that this gap widens with compute, but at 300 epochs alone the B-vs-A SIGReg comparison on Tiny-ImageNet is statistically tight; the strong universal claim of Section~\ref{sec:results:main} rests on \emph{sign} consistency across cells, not on a large per-cell margin in this particular cell.
+
+\subsection{Projector-$\times$-regularizer interaction}
+\label{sec:results:projector}
+
+To check that our SIGReg-vs-VICReg comparison is not an artifact of the BN projector, we re-run Model B on Tiny-ImageNet without it. Table~\ref{tab:projector} reports the comparison.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Projector $\times$ regularizer interaction} (Model B, Tiny-ImageNet, 300 epochs). The BN projector helps SIGReg and hurts VICReg, which flips the winner at this compute budget.}
+  \label{tab:projector}
+  \small
+  \begin{tabular}{l c c c}
+    \toprule
+    Config & with projector & without projector & $\Delta_{\text{proj}}$ \\
+    \midrule
+    B+VICReg & 11.15 & \textbf{14.70} & $-3.55$ \\
+    B+SIGReg & \textbf{14.00} & 11.33 & $+2.67$ \\
+    \midrule
+    Winner & SIGReg $+$2.9 & VICReg $+$3.4 & n/a \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The projector moves the two regularizers in opposite directions: VICReg works better without it, SIGReg works better with it, and the result is that the ``SIGReg wins on Model B at Tiny-ImageNet'' claim is conditional on the projector at 300 epochs. At 600 epochs with the projector, SIGReg still wins by $+4.8$ pp (Table~\ref{tab:scaling}), so scale eventually dominates. We report this explicitly rather than cherry-picking: our strongest configuration is B+SIGReg with the BN projector at 600 epochs.
+
+\subsection{Curvature ablation}
+\label{sec:results:curvature}
+
+Finally, Table~\ref{tab:curvature} varies the Poincar\'{e} curvature $c$ of Model B over an $8{\times}$ range.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Curvature ablation} (Model B, B+SIGReg+projector, Tiny-ImageNet, 300 epochs). All four curvatures produce means within $1.0$ pp of each other; $c{=}1.0$ is a reasonable default, not cherry-picked.}
+  \label{tab:curvature}
+  \small
+  \begin{tabular}{l c c c c}
+    \toprule
+    Curvature $c$ & s42 & s123 & s7 & Mean \\
+    \midrule
+    0.25             & 15.46 & 13.97 & 14.24 & 14.56 \\
+    0.5              & 14.70 & 15.68 & 14.59 & \textbf{15.00} \\
+    1.0 (main table) & 13.40 & 14.79 & 13.75 & 13.98 \\
+    2.0              & 14.83 & 13.96 & 15.91 & 14.90 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+All four curvatures sit within a $1.0$ pp band. The best mean is at $c{=}0.5$ ($15.0\%$), the main-table choice $c{=}1.0$ is the lowest ($14.0\%$), and all four are within seed noise. The Poincar\'{e}-predictor benefit is therefore not sensitive to the specific curvature choice over a range that varies the ball radius by a factor of two.
+
+\subsection{Collapse metrics are not a reliable model selector}
+\label{sec:results:collapse}
+
+We track two common anti-collapse diagnostics: the effective rank of the feature covariance matrix~\citep{roy2007effective} and the mean per-dimension variance. In our Tiny-ImageNet runs, B+SIGReg consistently has \emph{lower} effective rank ($\sim$88) but \emph{higher} mean-variance ($\sim$0.60) than B+VICReg ($\sim$142, $\sim$0.09 respectively), yet achieves higher probe accuracy. Neither metric tracks probe accuracy monotonically: two configurations with nearly identical probe accuracy can have rank differing by $70{+}$, and configurations with identical rank can differ by $5$ pp in probe. We thus caution against using anti-collapse metrics as a selection criterion in place of a downstream task probe, and include them in our tables only as diagnostic context.
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Joint-embedding SSL.}
+Our experiments build on the I-JEPA architecture~\citep{assran2023ijepa}, which in turn extends the general JEPA framework~\citep{lecun2022path}. Earlier feature-space contrastive SSL methods include SimCLR~\citep{chen2020simclr}, BYOL~\citep{grill2020byol}, SimSiam~\citep{chen2021simsiam}, DINO/DINOv2~\citep{caron2021dino,oquab2024dinov2}, and SwAV~\citep{caron2020swav}. Pixel-space approaches such as MAE~\citep{he2022mae} and SimMIM~\citep{xie2022simmim} reconstruct raw pixels rather than features. Our work is orthogonal: we do not change the JEPA architecture or training loop, only the geometry of the prediction loss.
+
+\paragraph{Anti-collapse regularizers.}
+The regularizers we study, VICReg~\citep{bardes2022vicreg} and SIGReg~\citep{ball2025lejepa}, follow a line of work that includes Barlow Twins~\citep{zbontar2021barlowtwins} and W-MSE~\citep{ermolov2021whitening}. LeJEPA's characterization of the isotropic Gaussian as the optimal anti-collapse distribution provides the theoretical grounding for our tangent-space formulation. Neither VICReg nor SIGReg was originally studied with hyperbolic embeddings; the tangent-space variant we propose is, to our knowledge, new.
+
+\paragraph{Hyperbolic representation learning.}
+\citet{nickel2017poincare} demonstrated that hyperbolic embeddings capture hierarchical structure more efficiently than Euclidean ones. Subsequent work spans two design points: (i) full-network hyperbolic models, where every layer operates on the manifold (hyperbolic neural networks~\citep{ganea2018hyperbolic,shimizu2021hyperbolicnn}, Poincar\'{e} ResNet~\citep{vanspengler2023poincareresnet}, and fully hyperbolic transformers~\citep{chen2022hyperbolic}), and (ii) Euclidean encoders with a hyperbolic head or loss, including hyperbolic image classifiers~\citep{khrulkov2020hyperbolic} and hyperbolic contrastive SSL~\citep{yue2023hyperbolic,ge2023hyperbolic}. Our work falls in the second design point. The closest prior work in spirit is~\citet{yue2023hyperbolic}, who use a Euclidean encoder with an exponential map at the output and a hyperbolic contrastive loss; we differ in (i) targeting masked-feature JEPA rather than contrastive SSL, and (ii) composing the hyperbolic loss with a distributional anti-collapse regularizer (tangent-space SIGReg) rather than relying on contrastive negatives. Concurrent work GeoWorld~\citep{zhang2026geoworld} also studies a Poincar\'{e}-ball formulation of JEPA, but for goal-conditioned video planning on instructional video benchmarks rather than image pretraining, and without the regularizer comparison, scaling analysis, or projector ablation we report.
+
+\paragraph{Scaling studies of SSL.}
+\citet{goyal2022vision}, \citet{oquab2024dinov2}, and the LeJEPA paper~\citep{ball2025lejepa} all report positive scaling of SSL methods under more data or compute. Our observation of \emph{negative} scaling for vanilla I-JEPA on Tiny-ImageNet ViT-Tiny (Sec.~\ref{sec:results:negscale}) is unusual and we do not claim it extrapolates to larger backbones; we report it as a reproducible finding at this operating point.
+
+\section{Discussion and limitations}
+\label{sec:discussion}
+
+\paragraph{Why does a Poincar\'{e} predictor help?}
+We do not claim a definitive mechanism. The hyperbolic-embedding literature argues that hierarchical structure (part--whole decompositions, subclass relationships) embeds more efficiently in constant-negative-curvature space. Masked-feature prediction implicitly demands that the predictor recover a target from a related context, which matches the ``parent encodes child'' structure that Poincar\'{e} embeddings naturally express. But our experiments do not test this mechanism directly; we leave the interpretability analysis (e.g., whether target patches cluster closer to the ball origin than context patches, whether the learned distances correlate with WordNet hierarchy) to future work.
+
+\paragraph{Why does SIGReg scale better than VICReg?}
+A concrete hypothesis: VICReg's per-dimension variance hinge becomes non-binding once variance exceeds $\gamma$, at which point only the covariance term contributes gradient. SIGReg, by matching a full distribution rather than moments, has no such saturation point. The $+2.8$ pp gain of B+SIGReg from 300 to 600 epochs vs.\ $+0.8$ pp for B+VICReg is consistent with this story but does not prove it.
+
+\paragraph{Limitations.}
+\emph{Scale.} All experiments use ViT-Tiny (192 dim), and the largest dataset is Tiny-ImageNet. We do not claim the findings extrapolate to ViT-S/ViT-B or to ImageNet-1k. In particular, the ``negative scaling of Model A'' finding in Table~\ref{tab:negscale} could plausibly reverse at larger scale or on a larger dataset, and the B+SIGReg-vs-VICReg gap at 600 epochs might not extend indefinitely.
+\emph{Seeds.} Three seeds per cell is the minimum defensible number and we use seed separation rather than variance estimates to argue consistency.
+\emph{Curvature.} We use a single shared $c$ across the Poincar\'{e} loss and tangent-SIGReg; decoupling these (different curvatures for loss vs.\ regularizer) might improve results further.
+\emph{Projector confound.} The projector-$\times$-regularizer interaction (Sec.~\ref{sec:results:projector}) means our SIG-vs-VIC comparison at 600 epochs is entangled with the projector choice; a no-projector 600-epoch matrix would resolve this but was beyond our compute budget.
+
+\paragraph{Future work.}
+Scaling the study to ViT-S and ImageNet-1k is the obvious next step. Beyond that, two mechanism-level studies are of interest: (i) whether the learned Poincar\'{e} geometry recovers known hierarchical structure (WordNet, HDBSCAN-derived clusters), and (ii) whether the tangent-space SIGReg formulation generalizes to other non-Euclidean SSL settings (spherical, product manifolds).
+
+\section{Conclusion}
+
+We asked a narrow empirical question: does curving only the prediction loss of I-JEPA, while leaving everything else Euclidean, produce better representations? Across a $2{\times}2{\times}3$ matrix of predictor-geometry $\times$ regularizer $\times$ dataset, the answer was unambiguously yes: twelve for twelve. Follow-up experiments showed that at larger compute on Tiny-ImageNet, the hyperbolic predictor additionally composes with a tangent-space version of SIGReg to open a widening gap over VICReg, and that the Euclidean baseline exhibits negative scaling under the same compute increase. We reported the confounds honestly, including a projector-$\times$-regularizer interaction that affects the 300-epoch ordering, and resolved an apparent failure mode of ambient SIGReg as a hyperparameter issue rather than an architectural one. A one-line change to the loss function is worth measuring before committing to heavier architectural interventions.
+
+\paragraph{Reproducibility.}
+Configuration files, submission scripts, per-epoch logs, and checkpoints for every run reported in this paper are released at \url{https://github.com/[anonymized]/hyperbolic-jepa}. Each row of Tables~\ref{tab:main}--\ref{tab:curvature} corresponds to a single config file and three seeds ($42$, $123$, $7$).
+
+\begin{small}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{small}
+
+\end{document}

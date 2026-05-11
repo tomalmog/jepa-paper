@@ -1,0 +1,6 @@
+- [project_goals.md](project_goals.md) — Full A/B/C results across CIFAR-10/100 + TinyIN; paper positioning and open items
+- [project_sigreg_results.md](project_sigreg_results.md) — Live results for SIGReg × projector matrix (2026-04-22); SIGReg underperforms VICReg
+- [project_tier1_launch.md](project_tier1_launch.md) — Tier 1 21-job matrix launched 2026-04-28 (no-proj 1A, ViT-S 1B/1C); ~340 GPU-h, ~5-7 days
+- [project_tier1_results.md](project_tier1_results.md) — Tier 1 COMPLETE (2026-04-30): B+SIG headline holds at 600ep ViT-S (16.58%); B+VIC REGRESSES from 300→600ep (16.55→14.21)
+- [reference_gpu_server.md](reference_gpu_server.md) — SSH access and paths for GPU servers running experiments
+- [reference_sigreg.md](reference_sigreg.md) — SIGReg paper, spec, reference code (LeJEPA arXiv:2511.08544, github.com/galilai-group/lejepa)

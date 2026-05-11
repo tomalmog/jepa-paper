@@ -1,0 +1,207 @@
+\begin{thebibliography}{28}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Assran et~al.(2023)Assran, Duval, Misra, Bojanowski, Vincent, Rabbat,
+  LeCun, and Ballas]{assran2023ijepa}
+Mahmoud Assran, Quentin Duval, Ishan Misra, Piotr Bojanowski, Pascal Vincent,
+  Michael Rabbat, Yann LeCun, and Nicolas Ballas.
+\newblock Self-supervised learning from images with a joint-embedding
+  predictive architecture.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2023.
+
+\bibitem[Balestriero and LeCun(2025)]{ball2025lejepa}
+Randall Balestriero and Yann LeCun.
+\newblock Lejepa: Provable and scalable self-supervised learning without the
+  heuristics.
+\newblock \emph{arXiv preprint arXiv:2511.08544}, 2025.
+
+\bibitem[Bardes et~al.(2022)Bardes, Ponce, and LeCun]{bardes2022vicreg}
+Adrien Bardes, Jean Ponce, and Yann LeCun.
+\newblock Vicreg: Variance-invariance-covariance regularization for
+  self-supervised learning.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2022.
+
+\bibitem[Caron et~al.(2020)Caron, Misra, Mairal, Goyal, Bojanowski, and
+  Joulin]{caron2020swav}
+Mathilde Caron, Ishan Misra, Julien Mairal, Priya Goyal, Piotr Bojanowski, and
+  Armand Joulin.
+\newblock Unsupervised learning of visual features by contrasting cluster
+  assignments.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2020.
+
+\bibitem[Caron et~al.(2021)Caron, Touvron, Misra, J\'{e}gou, Mairal,
+  Bojanowski, and Joulin]{caron2021dino}
+Mathilde Caron, Hugo Touvron, Ishan Misra, Herv\'{e} J\'{e}gou, Julien Mairal,
+  Piotr Bojanowski, and Armand Joulin.
+\newblock Emerging properties in self-supervised vision transformers.
+\newblock In \emph{Proceedings of the IEEE/CVF International Conference on
+  Computer Vision (ICCV)}, 2021.
+
+\bibitem[Chen et~al.(2020)Chen, Kornblith, Norouzi, and Hinton]{chen2020simclr}
+Ting Chen, Simon Kornblith, Mohammad Norouzi, and Geoffrey Hinton.
+\newblock A simple framework for contrastive learning of visual
+  representations.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
+
+\bibitem[Chen et~al.(2022)Chen, Han, Lin, Zhao, Liu, Li, Sun, and
+  Zhou]{chen2022hyperbolic}
+Weize Chen, Xu~Han, Yankai Lin, Hexu Zhao, Zhiyuan Liu, Peng Li, Maosong Sun,
+  and Jie Zhou.
+\newblock Fully hyperbolic neural networks.
+\newblock In \emph{Proceedings of the 60th Annual Meeting of the Association
+  for Computational Linguistics (ACL)}, 2022.
+
+\bibitem[Chen and He(2021)]{chen2021simsiam}
+Xinlei Chen and Kaiming He.
+\newblock Exploring simple siamese representation learning.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2021.
+
+\bibitem[Dosovitskiy et~al.(2021)Dosovitskiy, Beyer, Kolesnikov, Weissenborn,
+  Zhai, Unterthiner, Dehghani, Minderer, Heigold, Gelly,
+  et~al.]{dosovitskiy2021vit}
+Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn,
+  Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg
+  Heigold, Sylvain Gelly, et~al.
+\newblock An image is worth 16$\times$16 words: Transformers for image
+  recognition at scale.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+
+\bibitem[Epps and Pulley(1983)]{epps1983normality}
+Thomas~W. Epps and Lawrence~B. Pulley.
+\newblock A test for normality based on the empirical characteristic function.
+\newblock \emph{Biometrika}, 70\penalty0 (3):\penalty0 723--726, 1983.
+
+\bibitem[Ermolov et~al.(2021)Ermolov, Siarohin, Sangineto, and
+  Sebe]{ermolov2021whitening}
+Aleksandr Ermolov, Aliaksandr Siarohin, Enver Sangineto, and Nicu Sebe.
+\newblock Whitening for self-supervised representation learning.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2021.
+
+\bibitem[Ganea et~al.(2018)Ganea, B\'{e}cigneul, and
+  Hofmann]{ganea2018hyperbolic}
+Octavian-Eugen Ganea, Gary B\'{e}cigneul, and Thomas Hofmann.
+\newblock Hyperbolic neural networks.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2018.
+
+\bibitem[Ge et~al.(2023)Ge, Mishra, Kornblith, Li, and
+  Jacobs]{ge2023hyperbolic}
+Songwei Ge, Shlok Mishra, Simon Kornblith, Chun-Liang Li, and David Jacobs.
+\newblock Hyperbolic contrastive learning for visual representations beyond
+  objects.
+\newblock \emph{Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR)}, 2023.
+
+\bibitem[Goyal et~al.(2022)Goyal, Duval, Seessel, Caron, Singh, Misra, Sagun,
+  Joulin, and Bojanowski]{goyal2022vision}
+Priya Goyal, Quentin Duval, Isaac Seessel, Mathilde Caron, Mannat Singh, Ishan
+  Misra, Levent Sagun, Armand Joulin, and Piotr Bojanowski.
+\newblock Vision models are more robust and fair when pretrained on uncurated
+  images without supervision.
+\newblock \emph{arXiv preprint arXiv:2202.08360}, 2022.
+
+\bibitem[Grill et~al.(2020)Grill, Strub, Altch\'{e}, Tallec, Richemond,
+  Buchatskaya, Doersch, Pires, Guo, Azar, et~al.]{grill2020byol}
+Jean-Bastien Grill, Florian Strub, Florent Altch\'{e}, Corentin Tallec,
+  Pierre~H. Richemond, Elena Buchatskaya, Carl Doersch, Bernardo~A. Pires,
+  Zhaohan~D. Guo, Mohammad~G. Azar, et~al.
+\newblock Bootstrap your own latent: A new approach to self-supervised
+  learning.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2020.
+
+\bibitem[He et~al.(2022)He, Chen, Xie, Li, Doll{\'a}r, and Girshick]{he2022mae}
+Kaiming He, Xinlei Chen, Saining Xie, Yanghao Li, Piotr Doll{\'a}r, and Ross
+  Girshick.
+\newblock Masked autoencoders are scalable vision learners.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2022.
+
+\bibitem[Khrulkov et~al.(2020)Khrulkov, Mirvakhabova, Ustinova, Oseledets, and
+  Lempitsky]{khrulkov2020hyperbolic}
+Valentin Khrulkov, Leyla Mirvakhabova, Evgeniya Ustinova, Ivan Oseledets, and
+  Victor Lempitsky.
+\newblock Hyperbolic image embeddings.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2020.
+
+\bibitem[Le and Yang(2015)]{le2015tinyimagenet}
+Ya~Le and Xuan Yang.
+\newblock Tiny {ImageNet} visual recognition challenge.
+\newblock CS231N course project, Stanford University, 2015.
+\newblock URL
+  \url{http://cs231n.stanford.edu/reports/2015/pdfs/yle_project.pdf}.
+
+\bibitem[LeCun(2022)]{lecun2022path}
+Yann LeCun.
+\newblock A path towards autonomous machine intelligence.
+\newblock \emph{OpenReview manuscript}, 2022.
+\newblock URL \url{https://openreview.net/pdf?id=BZ5a1r-kVsf}.
+
+\bibitem[Nickel and Kiela(2017)]{nickel2017poincare}
+Maximilian Nickel and Douwe Kiela.
+\newblock Poincar\'{e} embeddings for learning hierarchical representations.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2017.
+
+\bibitem[Oquab et~al.(2024)Oquab, Darcet, Moutakanni, Vo, Szafraniec, Khalidov,
+  Fernandez, Haziza, Massa, El-Nouby, et~al.]{oquab2024dinov2}
+Maxime Oquab, Timoth\'{e}e Darcet, Th\'{e}o Moutakanni, Huy~V. Vo, Marc
+  Szafraniec, Vasil Khalidov, Pierre Fernandez, Daniel Haziza, Francisco Massa,
+  Alaaeldin El-Nouby, et~al.
+\newblock Dinov2: Learning robust visual features without supervision.
+\newblock \emph{Transactions on Machine Learning Research (TMLR)}, 2024.
+
+\bibitem[Roy and Vetterli(2007)]{roy2007effective}
+Olivier Roy and Martin Vetterli.
+\newblock The effective rank: A measure of effective dimensionality.
+\newblock In \emph{15th European Signal Processing Conference (EUSIPCO)}, 2007.
+
+\bibitem[Shimizu et~al.(2021)Shimizu, Mukuta, and
+  Harada]{shimizu2021hyperbolicnn}
+Ryohei Shimizu, Yusuke Mukuta, and Tatsuya Harada.
+\newblock Hyperbolic neural networks++.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+
+\bibitem[van Spengler et~al.(2023)van Spengler, Berkhout, and
+  Mettes]{vanspengler2023poincareresnet}
+Max van Spengler, Erwin Berkhout, and Pascal Mettes.
+\newblock Poincar\'{e} resnet.
+\newblock In \emph{Proceedings of the IEEE/CVF International Conference on
+  Computer Vision (ICCV)}, 2023.
+
+\bibitem[Xie et~al.(2022)Xie, Zhang, Cao, Lin, Bao, Yao, Dai, and
+  Hu]{xie2022simmim}
+Zhenda Xie, Zheng Zhang, Yue Cao, Yutong Lin, Jianmin Bao, Zhuliang Yao,
+  Qi~Dai, and Han Hu.
+\newblock Simmim: A simple framework for masked image modeling.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition (CVPR)}, 2022.
+
+\bibitem[Yue et~al.(2023)Yue, Lin, Yamada, and Zhang]{yue2023hyperbolic}
+Yun Yue, Fangzhou Lin, Kazunori~D. Yamada, and Ziming Zhang.
+\newblock Hyperbolic contrastive learning.
+\newblock \emph{arXiv preprint arXiv:2302.01409}, 2023.
+
+\bibitem[Zbontar et~al.(2021)Zbontar, Jing, Misra, LeCun, and
+  Deny]{zbontar2021barlowtwins}
+Jure Zbontar, Li~Jing, Ishan Misra, Yann LeCun, and St\'{e}phane Deny.
+\newblock Barlow twins: Self-supervised learning via redundancy reduction.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2021.
+
+\bibitem[Zhang et~al.(2026)Zhang, Li, Reid, and Hartley]{zhang2026geoworld}
+Zeyu Zhang, Danning Li, Ian Reid, and Richard Hartley.
+\newblock Geoworld: Geometric world models.
+\newblock \emph{arXiv preprint arXiv:2602.23058}, 2026.
+
+\end{thebibliography}

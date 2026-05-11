@@ -1,0 +1,46 @@
+dataset: cifar10
+data_root: ~/data
+img_size: 32
+patch_size: 4
+num_workers: 4
+encoder: hyp_vit_tiny
+predictor_embed_dim: 96
+predictor_depth: 4
+predictor_num_heads: 4
+enc_mask_scale:
+- 0.85
+- 1.0
+pred_mask_scale:
+- 0.15
+- 0.2
+aspect_ratio:
+- 0.75
+- 1.5
+num_enc_masks: 1
+num_pred_masks: 4
+min_keep: 4
+allow_overlap: false
+batch_size: 256
+epochs: 100
+warmup_epochs: 5
+start_lr: 0.0001
+lr: 0.0004
+final_lr: 1.0e-06
+weight_decay: 0.04
+final_weight_decay: 0.2
+ema_start: 0.996
+ema_end: 1.0
+grad_clip: 3.0
+amp: false
+log_every: 50
+save_every: 25
+loss_type: poincare
+clip_radius: 1.0
+loss_power: 2.0
+vicreg: true
+vicreg_var_weight: 25.0
+vicreg_cov_weight: 1.0
+vicreg_gamma: 1.0
+curvature: 0.1
+vicreg_weight: 0.5
+output_dir: ./runs/c_combo_c0p1_lr0p0004_v0p5

@@ -1,0 +1,163 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{lecun2022path,assran2023ijepa}
+\citation{he2022mae}
+\citation{chen2020simclr,caron2021dino}
+\citation{grill2020byol,chen2021simsiam}
+\citation{caron2020swav}
+\citation{zbontar2021barlowtwins}
+\citation{bardes2022vicreg}
+\citation{ball2025lejepa}
+\citation{nickel2017poincare,khrulkov2020hyperbolic,ganea2018hyperbolic}
+\citation{vanspengler2023poincareresnet}
+\citation{yue2023hyperbolic}
+\citation{chen2022hyperbolic}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{ganea2018hyperbolic}
+\citation{assran2023ijepa}
+\citation{bardes2022vicreg}
+\citation{bardes2022vicreg}
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background}{2}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{2}{2}{Background}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}I-JEPA}{2}{subsection.2.1}\protected@file@percent }
+\newlabel{eq:ijepa-loss}{{1}{2}{I-JEPA}{equation.1}{}}
+\citation{ball2025lejepa}
+\citation{epps1983normality}
+\citation{ganea2018hyperbolic}
+\citation{ganea2018hyperbolic,vanspengler2023poincareresnet}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Anti-collapse regularizers}{3}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:background:regs}{{2.2}{3}{Anti-collapse regularizers}{subsection.2.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{VICReg \citep  {bardes2022vicreg}}{3}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{SIGReg \citep  {ball2025lejepa}}{3}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Poincar\'{e} ball}{3}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:background:poincare}{{2.3}{3}{Poincar\'{e} ball}{subsection.2.3}{}}
+\newlabel{eq:poincare-dist}{{3}{3}{Poincar\'{e} ball}{equation.3}{}}
+\newlabel{eq:logmap}{{4}{3}{Poincar\'{e} ball}{equation.4}{}}
+\newlabel{eq:clip}{{5}{3}{Poincar\'{e} ball}{equation.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{Method}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Euclidean vs.\ Poincar\'{e} prediction loss}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:method:losses}{{3.1}{3}{Euclidean vs.\ Poincar\'{e} prediction loss}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Model A (Euclidean, baseline).}{3}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Model B (Poincar\'{e}).}{3}{section*.6}\protected@file@percent }
+\newlabel{eq:loss-B}{{6}{3}{Model B (Poincar\'{e})}{equation.6}{}}
+\citation{le2015tinyimagenet}
+\citation{dosovitskiy2021vit}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Tangent-space SIGReg}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:method:tangent-sigreg}{{3.2}{4}{Tangent-space SIGReg}{subsection.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Batch-normalization projector}{4}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:method:projector}{{3.3}{4}{Batch-normalization projector}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental setup}{4}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{4}{4}{Experimental setup}{section.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Datasets.}{4}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Architecture.}{4}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Masking.}{4}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Optimization.}{4}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Regularizer-specific settings.}{4}{section*.11}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {Main matrix.} Linear-probe accuracy (\%) on each dataset's val set. All runs use the BN projector, $\lambda _{\text  {reg}}{=}0.1$, $c{=}1.0$ for Model B, and three seeds. \textbf  {Bold} marks the better of (A, B) within each regularizer $\times $ dataset cell.}}{5}{table.caption.16}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:main}{{1}{5}{\textbf {Main matrix.} Linear-probe accuracy (\%) on each dataset's val set. All runs use the BN projector, $\lambda _{\text {reg}}{=}0.1$, $c{=}1.0$ for Model B, and three seeds. \textbf {Bold} marks the better of (A, B) within each regularizer $\times $ dataset cell}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {paragraph}{Model B specifics.}{5}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Evaluation.}{5}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Seeds and statistics.}{5}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Compute.}{5}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{5}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{5}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Main matrix: Poincar\'{e} predictor wins universally}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:results:main}{{5.1}{5}{Main matrix: Poincar\'{e} predictor wins universally}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Scale-dependent regularizer choice}{5}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:results:scaling}{{5.2}{5}{Scale-dependent regularizer choice}{subsection.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Scaling on Tiny-ImageNet.} Model B linear-probe accuracy (\%) at 300 vs.\ 600 epochs, per seed and mean. SIGReg gains $+2.8$ pp from the extra compute while VICReg plateaus.}}{6}{table.caption.17}\protected@file@percent }
+\newlabel{tab:scaling}{{2}{6}{\textbf {Scaling on Tiny-ImageNet.} Model B linear-probe accuracy (\%) at 300 vs.\ 600 epochs, per seed and mean. SIGReg gains $+2.8$ pp from the extra compute while VICReg plateaus}{table.caption.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces \textbf  {Negative scaling of Model A.} A+VICReg on Tiny-ImageNet degrades with extra compute, on every seed. Rank and mean-variance remain healthy ($\sim $161 and $\sim $0.4 respectively), so this is not a collapse event but a genuine feature-quality degradation under continued training.}}{6}{table.caption.18}\protected@file@percent }
+\newlabel{tab:negscale}{{3}{6}{\textbf {Negative scaling of Model A.} A+VICReg on Tiny-ImageNet degrades with extra compute, on every seed. Rank and mean-variance remain healthy ($\sim $161 and $\sim $0.4 respectively), so this is not a collapse event but a genuine feature-quality degradation under continued training}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Negative scaling of Euclidean JEPA}{6}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:results:negscale}{{5.3}{6}{Negative scaling of Euclidean JEPA}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Ambient SIGReg fails due to regularizer weight, not architecture}{6}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:results:sigfix}{{5.4}{6}{Ambient SIGReg fails due to regularizer weight, not architecture}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Projector-$\times $-regularizer interaction}{6}{subsection.5.5}\protected@file@percent }
+\newlabel{sec:results:projector}{{5.5}{6}{Projector-$\times $-regularizer interaction}{subsection.5.5}{}}
+\citation{roy2007effective}
+\citation{assran2023ijepa}
+\citation{lecun2022path}
+\citation{chen2020simclr}
+\citation{grill2020byol}
+\citation{chen2021simsiam}
+\citation{caron2021dino,oquab2024dinov2}
+\citation{caron2020swav}
+\citation{he2022mae}
+\citation{xie2022simmim}
+\citation{bardes2022vicreg}
+\citation{ball2025lejepa}
+\citation{zbontar2021barlowtwins}
+\citation{ermolov2021whitening}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces \textbf  {Ambient SIGReg hyperparameter rescue} (Model A, Tiny-ImageNet, 300 epochs). The apparent catastrophic collapse at default $\lambda _{\text  {sig}}{=}0.1$ is a regularizer-weight issue, not a learning-rate issue: halving the LR only partially helps, while reducing $\lambda _{\text  {sig}}$ to $0.01$ stabilizes all three seeds. ``Diverged'' indicates that training produced a non-finite loss before the run completed; the mean column averages the two finite seeds.}}{7}{table.caption.19}\protected@file@percent }
+\newlabel{tab:sigfix}{{4}{7}{\textbf {Ambient SIGReg hyperparameter rescue} (Model A, Tiny-ImageNet, 300 epochs). The apparent catastrophic collapse at default $\lambda _{\text {sig}}{=}0.1$ is a regularizer-weight issue, not a learning-rate issue: halving the LR only partially helps, while reducing $\lambda _{\text {sig}}$ to $0.01$ stabilizes all three seeds. ``Diverged'' indicates that training produced a non-finite loss before the run completed; the mean column averages the two finite seeds}{table.caption.19}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces \textbf  {Projector $\times $ regularizer interaction} (Model B, Tiny-ImageNet, 300 epochs). The BN projector helps SIGReg and hurts VICReg, which flips the winner at this compute budget.}}{7}{table.caption.20}\protected@file@percent }
+\newlabel{tab:projector}{{5}{7}{\textbf {Projector $\times $ regularizer interaction} (Model B, Tiny-ImageNet, 300 epochs). The BN projector helps SIGReg and hurts VICReg, which flips the winner at this compute budget}{table.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Curvature ablation}{7}{subsection.5.6}\protected@file@percent }
+\newlabel{sec:results:curvature}{{5.6}{7}{Curvature ablation}{subsection.5.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Collapse metrics are not a reliable model selector}{7}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:results:collapse}{{5.7}{7}{Collapse metrics are not a reliable model selector}{subsection.5.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Related work}{7}{section.6}\protected@file@percent }
+\newlabel{sec:related}{{6}{7}{Related work}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Joint-embedding SSL.}{7}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Anti-collapse regularizers.}{7}{section*.23}\protected@file@percent }
+\citation{nickel2017poincare}
+\citation{ganea2018hyperbolic,shimizu2021hyperbolicnn}
+\citation{vanspengler2023poincareresnet}
+\citation{chen2022hyperbolic}
+\citation{khrulkov2020hyperbolic}
+\citation{yue2023hyperbolic,ge2023hyperbolic}
+\citation{yue2023hyperbolic}
+\citation{zhang2026geoworld}
+\citation{goyal2022vision}
+\citation{oquab2024dinov2}
+\citation{ball2025lejepa}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces \textbf  {Curvature ablation} (Model B, B+SIGReg+projector, Tiny-ImageNet, 300 epochs). All four curvatures produce means within $1.0$ pp of each other; $c{=}1.0$ is a reasonable default, not cherry-picked.}}{8}{table.caption.21}\protected@file@percent }
+\newlabel{tab:curvature}{{6}{8}{\textbf {Curvature ablation} (Model B, B+SIGReg+projector, Tiny-ImageNet, 300 epochs). All four curvatures produce means within $1.0$ pp of each other; $c{=}1.0$ is a reasonable default, not cherry-picked}{table.caption.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Hyperbolic representation learning.}{8}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Scaling studies of SSL.}{8}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion and limitations}{8}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{8}{Discussion and limitations}{section.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why does a Poincar\'{e} predictor help?}{8}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why does SIGReg scale better than VICReg?}{8}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limitations.}{8}{section*.28}\protected@file@percent }
+\bibstyle{plainnat}
+\bibdata{references}
+\bibcite{assran2023ijepa}{{1}{2023}{{Assran et~al.}}{{Assran, Duval, Misra, Bojanowski, Vincent, Rabbat, LeCun, and Ballas}}}
+\bibcite{ball2025lejepa}{{2}{2025}{{Balestriero and LeCun}}{{}}}
+\bibcite{bardes2022vicreg}{{3}{2022}{{Bardes et~al.}}{{Bardes, Ponce, and LeCun}}}
+\bibcite{caron2020swav}{{4}{2020}{{Caron et~al.}}{{Caron, Misra, Mairal, Goyal, Bojanowski, and Joulin}}}
+\bibcite{caron2021dino}{{5}{2021}{{Caron et~al.}}{{Caron, Touvron, Misra, J\'{e}gou, Mairal, Bojanowski, and Joulin}}}
+\bibcite{chen2020simclr}{{6}{2020}{{Chen et~al.}}{{Chen, Kornblith, Norouzi, and Hinton}}}
+\bibcite{chen2022hyperbolic}{{7}{2022}{{Chen et~al.}}{{Chen, Han, Lin, Zhao, Liu, Li, Sun, and Zhou}}}
+\bibcite{chen2021simsiam}{{8}{2021}{{Chen and He}}{{}}}
+\bibcite{dosovitskiy2021vit}{{9}{2021}{{Dosovitskiy et~al.}}{{Dosovitskiy, Beyer, Kolesnikov, Weissenborn, Zhai, Unterthiner, Dehghani, Minderer, Heigold, Gelly, et~al.}}}
+\bibcite{epps1983normality}{{10}{1983}{{Epps and Pulley}}{{}}}
+\@writefile{toc}{\contentsline {paragraph}{Future work.}{9}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{9}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{9}{section*.30}\protected@file@percent }
+\bibcite{ermolov2021whitening}{{11}{2021}{{Ermolov et~al.}}{{Ermolov, Siarohin, Sangineto, and Sebe}}}
+\bibcite{ganea2018hyperbolic}{{12}{2018}{{Ganea et~al.}}{{Ganea, B\'{e}cigneul, and Hofmann}}}
+\bibcite{ge2023hyperbolic}{{13}{2023}{{Ge et~al.}}{{Ge, Mishra, Kornblith, Li, and Jacobs}}}
+\bibcite{goyal2022vision}{{14}{2022}{{Goyal et~al.}}{{Goyal, Duval, Seessel, Caron, Singh, Misra, Sagun, Joulin, and Bojanowski}}}
+\bibcite{grill2020byol}{{15}{2020}{{Grill et~al.}}{{Grill, Strub, Altch\'{e}, Tallec, Richemond, Buchatskaya, Doersch, Pires, Guo, Azar, et~al.}}}
+\bibcite{he2022mae}{{16}{2022}{{He et~al.}}{{He, Chen, Xie, Li, Doll{\'a}r, and Girshick}}}
+\bibcite{khrulkov2020hyperbolic}{{17}{2020}{{Khrulkov et~al.}}{{Khrulkov, Mirvakhabova, Ustinova, Oseledets, and Lempitsky}}}
+\bibcite{le2015tinyimagenet}{{18}{2015}{{Le and Yang}}{{}}}
+\bibcite{lecun2022path}{{19}{2022}{{LeCun}}{{}}}
+\bibcite{nickel2017poincare}{{20}{2017}{{Nickel and Kiela}}{{}}}
+\bibcite{oquab2024dinov2}{{21}{2024}{{Oquab et~al.}}{{Oquab, Darcet, Moutakanni, Vo, Szafraniec, Khalidov, Fernandez, Haziza, Massa, El-Nouby, et~al.}}}
+\bibcite{roy2007effective}{{22}{2007}{{Roy and Vetterli}}{{}}}
+\bibcite{shimizu2021hyperbolicnn}{{23}{2021}{{Shimizu et~al.}}{{Shimizu, Mukuta, and Harada}}}
+\bibcite{vanspengler2023poincareresnet}{{24}{2023}{{van Spengler et~al.}}{{van Spengler, Berkhout, and Mettes}}}
+\bibcite{xie2022simmim}{{25}{2022}{{Xie et~al.}}{{Xie, Zhang, Cao, Lin, Bao, Yao, Dai, and Hu}}}
+\bibcite{yue2023hyperbolic}{{26}{2023}{{Yue et~al.}}{{Yue, Lin, Yamada, and Zhang}}}
+\bibcite{zbontar2021barlowtwins}{{27}{2021}{{Zbontar et~al.}}{{Zbontar, Jing, Misra, LeCun, and Deny}}}
+\bibcite{zhang2026geoworld}{{28}{2026}{{Zhang et~al.}}{{Zhang, Li, Reid, and Hartley}}}
+\gdef \@abspage@last{10}

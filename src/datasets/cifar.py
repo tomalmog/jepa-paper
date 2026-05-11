@@ -51,10 +51,10 @@ def build_pretrain_loader(
     root = str(Path(root).expanduser())
     transform = make_pretrain_transform(img_size)
     if dataset.lower() == "cifar10":
-        ds = datasets.CIFAR10(root, train=True, download=True, transform=transform)
+        ds = datasets.CIFAR10(root, train=True, download=False, transform=transform)
         n_classes = 10
     elif dataset.lower() == "cifar100":
-        ds = datasets.CIFAR100(root, train=True, download=True, transform=transform)
+        ds = datasets.CIFAR100(root, train=True, download=False, transform=transform)
         n_classes = 100
     else:
         raise ValueError(f"Unknown dataset {dataset}")
@@ -81,12 +81,12 @@ def build_eval_loaders(
     root = str(Path(root).expanduser())
     tfm = make_eval_transform(img_size)
     if dataset.lower() == "cifar10":
-        train = datasets.CIFAR10(root, train=True, download=True, transform=tfm)
-        test = datasets.CIFAR10(root, train=False, download=True, transform=tfm)
+        train = datasets.CIFAR10(root, train=True, download=False, transform=tfm)
+        test = datasets.CIFAR10(root, train=False, download=False, transform=tfm)
         n_classes = 10
     else:
-        train = datasets.CIFAR100(root, train=True, download=True, transform=tfm)
-        test = datasets.CIFAR100(root, train=False, download=True, transform=tfm)
+        train = datasets.CIFAR100(root, train=True, download=False, transform=tfm)
+        test = datasets.CIFAR100(root, train=False, download=False, transform=tfm)
         n_classes = 100
     kw = dict(batch_size=batch_size, num_workers=num_workers,
               pin_memory=_pin_memory_default(),

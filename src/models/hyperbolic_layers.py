@@ -136,12 +136,12 @@ class HyperbolicMLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.fc1(x)
-        x = hyp_activation(x, self.act, self.c)
-        # dropout in tangent
+        # Fused activation + dropout in tangent (avoids redundant exp/log)
         u = logmap0(x, self.c)
-        u = self.drop(u)
+        u = self.drop(self.act(u))
         x = expmap0(u, self.c)
         x = self.fc2(x)
+        # Fused dropout in tangent
         u = logmap0(x, self.c)
         u = self.drop(u)
         return expmap0(u, self.c)
