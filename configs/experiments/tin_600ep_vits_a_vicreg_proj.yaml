@@ -1,5 +1,5 @@
-# Tier 1C: Model B + tangent-SIGReg + BN projector (Tiny-ImageNet, 600 ep, ViT-Small)
-# ViT-S scaling-curve replication: B+SIGReg at 600ep on the bigger backbone
+# Tier 1.5: Model A + VICReg + BN projector (Tiny-ImageNet, 600 ep, ViT-Small)
+# Anchors the long-training Euclidean baseline against the completed B-cell runs.
 dataset: tiny_imagenet
 data_root: ~/data
 img_size: 64
@@ -34,18 +34,15 @@ amp: true
 log_every: 50
 save_every: 600
 
-loss_type: poincare
-curvature: 1.0
-clip_radius: 1.0
+loss_type: euclidean
 loss_power: 2.0
 
 projector: true
 
-sigreg: true
-sigreg_mode: tangent
-sigreg_num_slices: 256
-sigreg_t_max: 3.0
-sigreg_n_points: 17
-sigreg_weight: 0.1
+vicreg: true
+vicreg_weight: 0.1
+vicreg_var_weight: 25.0
+vicreg_cov_weight: 1.0
+vicreg_gamma: 1.0
 
-output_dir: ./runs/tin_600ep_vits_b_sigreg_proj
+output_dir: ./runs/tin_600ep_vits_a_vicreg_proj
